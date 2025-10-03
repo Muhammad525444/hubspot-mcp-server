@@ -1,25 +1,25 @@
-import express from "express";
-import axios from "axios";
+const express = require("express");
+const axios = require("axios");
 
 const app = express();
 app.use(express.json());
 
 const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
 
-// Health check endpoint (for Render)
+// Health check
 app.get("/healthz", (req, res) => {
   res.send("OK");
 });
 
-// Example MCP-like endpoint
+// MCP-like endpoint
 app.post("/mcp", async (req, res) => {
   try {
     const { action, object, payload } = req.body;
 
-    // Example: list tickets
+    // List tickets
     if (action === "list" && object === "tickets") {
       const response = await axios.get(
-        "https://api.hubspot.com/crm/v3/objects/tickets",
+        "https://api.hubapi.com/crm/v3/objects/tickets",
         {
           headers: {
             Authorization: `Bearer ${HUBSPOT_TOKEN}`,
@@ -30,10 +30,10 @@ app.post("/mcp", async (req, res) => {
       return res.json({ tools: "list-tickets", data: response.data });
     }
 
-    // Example: create a ticket
+    // Create ticket
     if (action === "create" && object === "ticket") {
       const response = await axios.post(
-        "https://api.hubspot.com/crm/v3/objects/tickets",
+        "https://api.hubapi.com/crm/v3/objects/tickets",
         payload,
         {
           headers: {
@@ -48,7 +48,9 @@ app.post("/mcp", async (req, res) => {
     res.json({ error: "Unsupported action/object" });
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "HubSpot API error", details: err.message });
+    res
+      .status(500)
+      .json({ error: "HubSpot API error", details: err.response?.data || err.message });
   }
 });
 
