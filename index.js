@@ -5,7 +5,6 @@ const app = express();
 app.use(express.json());
 
 const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
-const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
 console.log("Loaded token:", HUBSPOT_TOKEN ? HUBSPOT_TOKEN.slice(0, 10) : "Missing");
 
 
