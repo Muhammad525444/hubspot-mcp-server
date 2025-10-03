@@ -1,0 +1,10 @@
+{
+  "name": "hubspot-mcp-render",
+  "version": "1.0.0",
+  "dependencies": {
+    "@hubspot/mcp-server": "^1.0.0"
+  },
+  "scripts": {
+    "start": "npx @hubspot/mcp-server"
+  }
+}
