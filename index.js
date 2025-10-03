@@ -1,63 +1,34 @@
-const express = require("express");
-const axios = require("axios");
+import { Server } from "@modelcontextprotocol/sdk/server";
+import { HTTPServerTransport } from "@modelcontextprotocol/sdk/server/http";
+import express from "express";
+import axios from "axios";
 
+const HUBSPOT_TOKEN = process.env.PRIVATE_APP_ACCESS_TOKEN;
 const app = express();
-app.use(express.json());
 
-const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
-console.log("Loaded token:", HUBSPOT_TOKEN ? HUBSPOT_TOKEN.slice(0, 10) : "Missing");
+// Create MCP server
+const server = new Server({ name: "hubspot-mcp", version: "1.0.0" });
 
-
-// Health check endpoint (for Render)
-app.get("/healthz", (req, res) => {
-  res.send("OK");
+// Define tools
+server.tool("list-tickets", "List HubSpot tickets", async () => {
+  const res = await axios.get("https://api.hubapi.com/crm/v3/objects/tickets", {
+    headers: { Authorization: `Bearer ${HUBSPOT_TOKEN}` }
+  });
+  return { content: [{ type: "json", data: res.data }] };
 });
 
-// Minimal MCP-like endpoint
-app.post("/mcp", async (req, res) => {
-  try {
-    const { action, object, payload } = req.body;
-
-    // List tickets
-    if (action === "list" && object === "tickets") {
-      const response = await axios.get(
-        "https://api.hubapi.com/crm/v3/objects/tickets",
-        {
-          headers: {
-            Authorization: `Bearer ${HUBSPOT_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return res.json({ tools: "list-tickets", data: response.data });
-    }
-
-    // Create ticket
-    if (action === "create" && object === "ticket") {
-      const response = await axios.post(
-        "https://api.hubapi.com/crm/v3/objects/tickets",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${HUBSPOT_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return res.json({ tools: "create-ticket", data: response.data });
-    }
-
-    res.json({ error: "Unsupported action/object" });
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    res
-      .status(500)
-      .json({
-        error: "HubSpot API error",
-        details: err.response?.data || err.message,
-      });
-  }
+server.tool("create-ticket", "Create a HubSpot ticket", async ({ input }) => {
+  const res = await axios.post(
+    "https://api.hubapi.com/crm/v3/objects/tickets",
+    input,
+    { headers: { Authorization: `Bearer ${HUBSPOT_TOKEN}` } }
+  );
+  return { content: [{ type: "json", data: res.data }] };
 });
+
+// Hook Express into MCP transport
+const transport = new HTTPServerTransport({ app, path: "/mcp" });
+server.connect(transport);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
