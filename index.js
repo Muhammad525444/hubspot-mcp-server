@@ -6,12 +6,12 @@ app.use(express.json());
 
 const HUBSPOT_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN;
 
-// Health check
+// Health check endpoint (for Render)
 app.get("/healthz", (req, res) => {
   res.send("OK");
 });
 
-// MCP-like endpoint
+// Minimal MCP-like endpoint
 app.post("/mcp", async (req, res) => {
   try {
     const { action, object, payload } = req.body;
@@ -50,7 +50,10 @@ app.post("/mcp", async (req, res) => {
     console.error(err.response?.data || err.message);
     res
       .status(500)
-      .json({ error: "HubSpot API error", details: err.response?.data || err.message });
+      .json({
+        error: "HubSpot API error",
+        details: err.response?.data || err.message,
+      });
   }
 });
 
