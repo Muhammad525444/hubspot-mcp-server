@@ -1,10 +1,12 @@
 {
-  "name": "hubspot-mcp-render",
+  "name": "hubspot-mcp-server",
   "version": "1.0.0",
-  "dependencies": {
-    "@hubspot/mcp-server": "^1.0.0"
-  },
+  "main": "index.js",
   "scripts": {
-    "start": "npx @hubspot/mcp-server"
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0"
   }
 }
