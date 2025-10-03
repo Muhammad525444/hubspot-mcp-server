@@ -1,4 +1,4 @@
-{{
+{
   "name": "hubspot-mcp-server",
   "version": "1.0.0",
   "type": "module",
@@ -11,5 +11,3 @@
     "start": "node index.js"
   }
 }
-
-
